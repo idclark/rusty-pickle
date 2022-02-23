@@ -1,7 +1,9 @@
-use serde::{de::DeserializedOwned, Serialize};
+use serde::{de::DeserializeOwned, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
+
+use crate::error::{Error, ErrorCode, Result};
 
 pub enum DumpPolicy {
     Never,
@@ -34,7 +36,7 @@ impl Pickle {
 
     pub fn get<V>(&self, key: &str) -> Option<V>
     where
-        V: DeserializedOwned,
+        V: DeserializeOwned,
     {
         match self.map.get(key) {
             Some(val) => self.serializer.deserialize_data::<V>(&val),
@@ -84,6 +86,3 @@ impl Pickle {
         self.map.get(key).is_some() || self.list_map.get(key).is_some()
     }
 }
-
-   
-

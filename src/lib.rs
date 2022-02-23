@@ -1,2 +1,5 @@
-pub use self::rustypickle::{Pickle, DumpPolicy};
+pub use self::rustypickle::{DumpPolicy, Pickle};
+
 mod rustypickle;
+
+pub mod error;
