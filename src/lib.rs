@@ -1,5 +1,6 @@
 pub use self::rustypickle::{DumpPolicy, Pickle};
-
-mod rustypickle;
+pub use self::serialization::SerializationMethod;
 
 pub mod error;
+mod rustypickle;
+mod serialization;

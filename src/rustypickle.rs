@@ -4,6 +4,8 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use crate::error::{Error, ErrorCode, Result};
+use crate::serialization::SerializationMethod;
+use crate::serialization::Serializer;
 
 pub enum DumpPolicy {
     Never,
@@ -15,19 +17,25 @@ pub enum DumpPolicy {
 pub struct Pickle {
     map: HashMap<String, Vec<u8>>,
     list_map: HashMap<String, Vec<Vec<u8>>>,
+    serializer: Serializer,
     db_file_path: PathBuf,
     dump_policy: DumpPolicy,
     // last dump
 }
 
 impl Pickle {
-    pub fn new<P: AsRef<Path>>(db_path: P, dump_policy: DumpPolicy) -> Pickle {
+    pub fn new<P: AsRef<Path>>(
+        db_path: P,
+        dump_policy: DumpPolicy,
+        serialization_method: SerializationMethod,
+    ) -> Pickle {
         let mut db_path_buf = PathBuf::new();
         db_path_buf.push(db_path);
 
         Pickle {
             map: HashMap::new(),
             list_map: HashMap::new(),
+            serializer: Serializer::new(serialization_method),
             db_file_path: db_path_buf,
             dump_policy,
             // last dump TODO
