@@ -57,3 +57,20 @@ impl JsonSerializer {
         }
     }
 }
+
+// crate a struct to hold all of our serialization methods. Right now that's just json.
+pub(crate) struct Serializer {
+    ser_method: SerializationMethod,
+    json_serializer: JsonSerializer,
+}
+
+impl Serializer {
+    pub(crate) fn new(ser_method: SerializationMethod) -> Serializer {
+        Serializer {
+            ser_method,
+            json_serializer: JsonSerializer::new(),
+            // deserialize_data
+            // serialize_data
+        }
+    }
+}
