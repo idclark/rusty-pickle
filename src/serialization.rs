@@ -73,4 +73,22 @@ impl Serializer {
             // serialize_data
         }
     }
+
+    pub(crate) fn deserialize_data<V>(&self, ser_data: &[u8]) -> Option<V>
+    where
+        V: DeserializeOwned,
+    {
+        match self.ser_method {
+            SerializationMethod::Json => self.json_serializer.deserialize_data(ser_data),
+        }
+    }
+
+    pub(crate) fn serialize_data<V>(&self, data: &V) -> Result<Vec<u8>, String>
+    where
+        V: Serialize,
+    {
+        match self.ser_method {
+            SerializationMethod::Json => self.json_serializer.serialize_data(data),
+        }
+    }
 }
