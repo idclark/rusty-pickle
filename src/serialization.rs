@@ -91,4 +91,20 @@ impl Serializer {
             SerializationMethod::Json => self.json_serializer.serialize_data(data),
         }
     }
+    // we need these for the dumpdb calls in rustypickle.rs
+    pub(crate) fn serialize_db(
+        &self,
+        map: &DbMap,
+        list_map: &DbMapList,
+    ) -> Result<Vec<u8>, String> {
+        match self.ser_method {
+            SerializationMethod::Json => self.json_serializer.serialize_db(map, list_map),
+        }
+    }
+
+    pub(crate) fn deserialize_db(&self, ser_db: &[u8]) -> Result<(DbMap, DbMapList), String> {
+        match self.ser_method {
+            SerializationMethod::Json => self.json_serializer.deserialize_db(ser_db),
+        }
+    }
 }

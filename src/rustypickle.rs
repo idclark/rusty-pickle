@@ -1,7 +1,8 @@
 use serde::{de::DeserializeOwned, Serialize};
 use std::collections::HashMap;
+use std::iter::Inspect;
 use std::path::{Path, PathBuf};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crate::error::{Error, ErrorCode, Result};
 use crate::serialization::SerializationMethod;
@@ -79,6 +80,28 @@ impl Pickle {
 
                 Err(err)
             }
+        }
+    }
+
+    pub fn dump(&mut self) -> Result<()> {
+        if let DumpPolicy::Never = self.dump_policy {
+            return Ok(());
+        }
+        //match self.serializer;
+    }
+
+    fn dumpdb(&mut self) -> Result<()> {
+        match self.dump_policy {
+            DumpPolicy::Auto => self.dump(),
+            DumpPolicy::Periodic(duration) => {
+                let now = Instant::now();
+                if now.duration_since(self.last_dump) > duration {
+                    self.last_dump = Instant::now();
+                    self.dump()?;
+                }
+                Ok(())
+            }
+            _ => Ok(()),
         }
     }
 
