@@ -1,8 +1,9 @@
 use serde::{de::DeserializeOwned, Serialize};
 use std::collections::HashMap;
+use std::fs;
 use std::iter::Inspect;
 use std::path::{Path, PathBuf};
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use crate::error::{Error, ErrorCode, Result};
 use crate::serialization::SerializationMethod;
@@ -21,7 +22,7 @@ pub struct Pickle {
     serializer: Serializer,
     db_file_path: PathBuf,
     dump_policy: DumpPolicy,
-    // last dump
+    last_dump: Instant,
 }
 
 impl Pickle {
@@ -39,7 +40,7 @@ impl Pickle {
             serializer: Serializer::new(serialization_method),
             db_file_path: db_path_buf,
             dump_policy,
-            // last dump TODO
+            last_dump: Instant::now(),
         }
     }
 
@@ -87,8 +88,36 @@ impl Pickle {
         if let DumpPolicy::Never = self.dump_policy {
             return Ok(());
         }
-        //match self.serializer;
-    }
+
+        match self.serializer.serialize_db(&self.map, &self.list_map) {
+            Ok(ser_db) => {
+                let temp_file_path = format!(
+                    "{}.temp.{}",
+                    self.db_file_path.to_str().unwrap(),
+                    SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .unwrap()
+                        .as_secs()
+                );
+
+                match fs::write(&temp_file_path, ser_db) {
+                    Ok(_) => (),
+                    Err(err) => return Err(Error::new(ErrorCode::Io(err))),
+                }
+
+                match fs::rename(temp_file_path, &self.db_file_path) {
+                    Ok(_) => (),
+                    Err(err) => return Err(Error::new(ErrorCode::Io(err))),
+                }
+
+                if let DumpPolicy::Periodic(_dur) = self.dump_policy {
+                    self.last_dump = Instant::now();
+                }
+                Ok(())
+            }
+            Err(err_str) => Err(Error::new(ErrorCode::Serialization(err_str))),
+        }
+    } // end dump method
 
     fn dumpdb(&mut self) -> Result<()> {
         match self.dump_policy {
