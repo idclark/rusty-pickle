@@ -1,4 +1,4 @@
-use rusty_pickle::Pickle;
+pub use rusty_pickle::Pickle;
 
 #[cfg(test)]
 mod tests {
@@ -15,11 +15,29 @@ mod tests {
         );
 
         let num = 100;
+        let string = String::from("hello");
         db.set("num", &num).unwrap();
+        db.set("a string", &string).unwrap();
         // read a num
         assert_eq!(db.get::<i32>("num").unwrap(), num);
+        // read a string
+        assert_eq!(db.get::<String>("a string").unwrap(), "hello");
     }
+
+    #[test]
+    fn test_dump_db() {
+        let mut db = Pickle::new(
+            "test_name",
+            DumpPolicy::UponRequest,
+            rusty_pickle::SerializationMethod::Json,
+        );
+        let num = 100;
+        let string = String::from("hello");
+        db.set("num", &num).unwrap();
+        db.set("a string", &string).unwrap();
+        assert!(db.dump().is_ok())
+    }
+
+    #[test]
+    fn test_load_db() {}
 }
-// #[test]
-//     fn test_get() {}
-// }

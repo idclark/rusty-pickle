@@ -1,0 +1,9 @@
+[package]
+name = "rustypickle_simple_pickle"
+version = "0.1.0"
+authors = ["Ian Clark <idclark13@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+rusty-pickle = { path = "../../" }
+serde = { version = "1.0.82", features = ["derive"] }
