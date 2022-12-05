@@ -39,5 +39,37 @@ mod tests {
     }
 
     #[test]
-    fn test_load_db() {}
+    fn test_load_db() {
+        let mut db = Pickle::new(
+            "test.db",
+            DumpPolicy::Auto,
+            rusty_pickle::SerializationMethod::Json,
+        );
+        assert!(db.load("test.db").is_ok())
+    }
+    #[test]
+    fn test_get_all_keys() {
+        let mut db = Pickle::new(
+            "test.db",
+            DumpPolicy::Auto,
+            rusty_pickle::SerializationMethod::Json,
+        );
+
+        let key_count = 10;
+
+        for i in 0..10 {
+            db.set("key" + i, i);
+        }
+
+        assert_eq!(db.get_all(), key_count);
+    }
+
+    #[test]
+    fn test_list_keys() {
+        let mut db = Pickle::new(
+            "test.db",
+            DumpPolicy::Auto,
+            rusty_pickle::SerializationMethod::Json,
+        );
+    }
 }
