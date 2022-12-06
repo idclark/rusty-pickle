@@ -47,6 +47,7 @@ mod tests {
         );
         assert!(db.load("test.db").is_ok())
     }
+
     #[test]
     fn test_get_all_keys() {
         let mut db = Pickle::new(
@@ -56,12 +57,13 @@ mod tests {
         );
 
         let key_count = 10;
+        let dummy_value = 1;
 
         for i in 0..10 {
-            db.set("key" + i, i);
+            db.set(&format!("{}{}", "key", i), &dummy_value).unwrap();
         }
 
-        assert_eq!(db.get_all(), key_count);
+        assert_eq!(db.key_count(), key_count);
     }
 
     #[test]

@@ -145,4 +145,9 @@ impl Pickle {
     pub fn exists(&self, key: &str) -> bool {
         self.map.get(key).is_some() || self.list_map.get(key).is_some()
     }
+
+    pub fn key_count(&self) -> usize {
+        // the latter addition is moot until the methods are added
+        self.map.iter().len() + self.list_map.iter().len()
+    }
 }
