@@ -44,6 +44,40 @@ impl Pickle {
         }
     }
 
+    pub fn load<P: AsRef<Path>>(
+        db_path: P,
+        dump_policy: DumpPolicy,
+        serialization_method: SerializationMethod,
+    ) -> Result<Pickle> {
+        let content = match fs::read(db_path.as_ref()) {
+            Ok(file_content) => file_content,
+            Err(err) => return Err(Error::new(ErrorCode::Io(err))),
+        };
+
+        let serializer = Serializer::new(serialization_method);
+
+        let maps_from_file: (_, _) = match serializer.deserialize_db(&content) {
+            Ok(maps) => maps,
+            Err(err_str) => return Err(Error::new(ErrorCode::Serialization(err_str))),
+        };
+
+        let mut db_path_buf = PathBuf::new();
+        db_path_buf.push(db_path);
+
+        Ok(Pickle {
+            map: maps_from_file.0,
+            list_map: maps_from_file.1,
+            serializer,
+            db_file_path: db_path_buf,
+            dump_policy,
+            last_dump: Instant::now(),
+        })
+    }
+
+    pub fn load_json<P: AsRef<Path>>(db_path: P, dump_policy: DumpPolicy) -> Result<Pickle> {
+        Pickle::load(db_path, dump_policy, SerializationMethod::Json)
+    }
+
     pub fn get<V>(&self, key: &str) -> Option<V>
     where
         V: DeserializeOwned,
