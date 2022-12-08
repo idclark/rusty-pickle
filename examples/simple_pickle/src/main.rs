@@ -11,4 +11,7 @@ fn main() {
 
     // set the value 'hello world' to the key 'key3'
     db.set("key3", &String::from("hello world")).unwrap();
+
+    let num_keys = db.key_count();
+    println!("You have inserted {} keys", num_keys);
 }

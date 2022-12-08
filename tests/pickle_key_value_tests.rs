@@ -40,12 +40,14 @@ mod tests {
 
     #[test]
     fn test_load_db() {
-        let mut db = Pickle::new(
-            "test.db",
+        let mut db = Pickle::load(
+            "test_name",
             DumpPolicy::Auto,
             rusty_pickle::SerializationMethod::Json,
-        );
-        assert!(db.load("test.db").is_ok())
+        )
+        .unwrap();
+
+        assert_eq!(db.get::<String>("a string").unwrap(), "hello");
     }
 
     #[test]
