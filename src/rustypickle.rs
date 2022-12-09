@@ -184,4 +184,12 @@ impl Pickle {
         // the latter addition is moot until the methods are added
         self.map.iter().len() + self.list_map.iter().len()
     }
+
+    pub fn list_keys(&self) -> Vec<String> {
+        let mut key_array: Vec<String> = Vec::new();
+        for k in self.map.keys() {
+            key_array.push(k.to_string());
+        }
+        key_array
+    }
 }

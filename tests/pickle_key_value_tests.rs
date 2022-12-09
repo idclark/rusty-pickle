@@ -75,5 +75,14 @@ mod tests {
             DumpPolicy::Auto,
             rusty_pickle::SerializationMethod::Json,
         );
+
+        let dummy_value = 1;
+
+        for i in 0..10 {
+            db.set(&format!("{}{}", "key", i), &dummy_value).unwrap();
+        }
+
+        let key_list = db.list_keys().len();
+        assert_eq!(key_list, 10)
     }
 }
