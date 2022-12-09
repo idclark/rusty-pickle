@@ -1,7 +1,6 @@
 use serde::{de::DeserializeOwned, Serialize};
 use std::collections::HashMap;
 use std::fs;
-use std::iter::Inspect;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -26,6 +25,23 @@ pub struct Pickle {
 }
 
 impl Pickle {
+    /// Constructs a new `Pickle` instance.
+    ///
+    /// # Arguments
+    ///
+    /// * `db_path` - a path where the DB will be stored
+    /// * `dump_policy` - an enum value that determines the policy of dumping DB changes into the file. Please see
+    ///    [Pickle::load()](#method.load) to understand the different policy options
+    /// * `serialization_method` - the serialization method to use for storing the data to memory and file
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use rusty_pickle::{Pickle, DumpPolicy, SerializationMethod};
+    ///
+    /// let mut db = Pickle::new("example.db", DbDumpPolicy::AutoDump, SerializationMethod::Json);
+    /// ```
+    ///
     pub fn new<P: AsRef<Path>>(
         db_path: P,
         dump_policy: DumpPolicy,
@@ -78,6 +94,20 @@ impl Pickle {
         Pickle::load(db_path, dump_policy, SerializationMethod::Json)
     }
 
+    /// Retrieve a value for a specified key
+    /// It's the user's responsibility to know the value type and give it while calling this method.
+    /// If the key doesn't exist or if the type is wrong, `None` will be returned.
+    /// Otherwise `Some(V)` will be returned.
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - the key for which you'd like to retrieve a value
+    ///
+    /// # Examples
+    ///
+    /// // read a num
+    /// let num = db.get::<i32>("key1").unwrap();
+    ///
     pub fn get<V>(&self, key: &str) -> Option<V>
     where
         V: DeserializeOwned,
@@ -88,6 +118,13 @@ impl Pickle {
         }
     }
 
+    /// Set a key and its respective value
+    ///
+    /// # Arguments
+    ///
+    /// * `key` - A string that a value would be associated with
+    /// * `value` - A piece of data to be stored
+    ///
     pub fn set<V>(&mut self, key: &str, value: &V) -> Result<()>
     where
         V: Serialize,
@@ -180,11 +217,26 @@ impl Pickle {
         self.map.get(key).is_some() || self.list_map.get(key).is_some()
     }
 
+    /// Return the count of keys in the database
+    ///
+    /// This method returns a `usize` of the number of keys in the database
+    ///
+    /// # Examples
+    ///
+    /// let count = db.key_count();
+    ///
     pub fn key_count(&self) -> usize {
         // the latter addition is moot until the methods are added
         self.map.iter().len() + self.list_map.iter().len()
     }
 
+    /// Return a vector of keys in the database
+    ///
+    ///
+    /// # Examples
+    ///
+    /// let key_array = db.list_keys()
+    ///
     pub fn list_keys(&self) -> Vec<String> {
         let mut key_array: Vec<String> = Vec::new();
         for k in self.map.keys() {
