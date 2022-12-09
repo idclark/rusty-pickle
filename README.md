@@ -6,7 +6,7 @@ It's an in-mem key value store with an option to serialize to json.
 It'll eventually include parquet serialization. 
 
 ## Example Usage 
-Refer to the [Examples/](https://github.com/idclark/rusty-pickle/examples/) directory:
+Refer to the [Examples/](https://github.com/idclark/rusty-pickle/tree/main/examples) directory:
 
 ``` rust
 use rusty_pickle::{DumpPolicy, Pickle, SerializationMethod};
