@@ -1,3 +1,8 @@
+//! A simple example of how to use the Pickle database. It includes:
+//! * Creating a new DB
+//! * Loading an existing DB from a file
+//! * Setting and getting key-value pairs of different types
+
 use rusty_pickle::{DumpPolicy, Pickle, SerializationMethod};
 
 fn main() {
