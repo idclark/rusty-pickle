@@ -85,4 +85,22 @@ mod tests {
         let key_list = db.list_keys().len();
         assert_eq!(key_list, 10)
     }
+
+    #[test]
+    fn test_remove_key() {
+        let mut db = Pickle::new(
+            "test_remove.db",
+            DumpPolicy::Auto,
+            rusty_pickle::SerializationMethod::Json,
+        );
+
+        let num = 100;
+        let string = String::from("hello");
+        db.set("num", &num).unwrap();
+        db.set("a string", &string).unwrap();
+
+        db.remove("num");
+        assert_eq!(db.exists("num"), false);
+        assert!(db.exists("a string"));
+    }
 }

@@ -244,4 +244,37 @@ impl Pickle {
         }
         key_array
     }
+
+    /// Remove a key-value pair or a list from the DB.
+    ///
+    /// This methods returns `Ok(true)` if the key was found in the DB or `Ok(false)` if it wasn't found.
+    /// # Arguments
+    ///
+    /// * `key` the key or list name to remove
+    ///
+    pub fn remove(&mut self, key: &str) -> Result<bool> {
+        let remove_map = match self.map.remove(key) {
+            None => None,
+            Some(val) => match self.dumpdb() {
+                Ok(_) => Some(val),
+                Err(err) => {
+                    self.map.insert(String::from(key), val);
+                    return Err(err);
+                }
+            },
+        };
+
+        let remove_list = match self.list_map.remove(key) {
+            None => None,
+            Some(list) => match self.dumpdb() {
+                Ok(_) => Some(list),
+                Err(err) => {
+                    self.list_map.insert(String::from(key), list);
+                    return Err(err);
+                }
+            },
+        };
+
+        Ok(remove_map.is_some() || remove_list.is_some())
+    }
 }
