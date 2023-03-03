@@ -3,3 +3,6 @@
 *.rs~
 /test_name
 *.toml~
+/examples/simple_pickle/target/
+/examples/simple_pickle/test.db
+*.db

@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use crate::error::{Error, ErrorCode, Result};
+use crate::extenders::PickleListExtender;
 use crate::serialization::SerializationMethod;
 use crate::serialization::Serializer;
 
@@ -276,5 +277,44 @@ impl Pickle {
         };
 
         Ok(remove_map.is_some() || remove_list.is_some())
+    }
+
+    pub fn ladd<V>(&mut self, name: &str, value: &V) -> Option<PickleListExtender>
+    where
+        V: Serialize,
+    {
+        self.lextend(name, &[value])
+    }
+
+    pub fn lextend<'a, V, I>(&mut self, name: &str, seq: I) -> Option<PickleListExtender>
+    where
+        V: 'a + Serialize,
+        I: IntoIterator<Item = &'a V>,
+    {
+        let serializer = &self.serializer;
+        match self.list_map.get_mut(name) {
+            Some(list) => {
+                let original_len = list.len();
+                let serialized: Vec<Vec<u8>> = seq
+                    .into_iter()
+                    .map(|x| serializer.serialize_data(x).unwrap())
+                    .collect();
+                list.extend(serialized);
+                match self.dumpdb() {
+                    Ok(_) => (),
+                    Err(_) => {
+                        let same_list = self.list_map.get_mut(name).unwrap();
+                        same_list.truncate(original_len);
+                        return None;
+                    }
+                }
+                Some(PickleListExtender {
+                    db: self,
+                    list_name: String::from(name),
+                })
+            }
+
+            None => None,
+        }
     }
 }
