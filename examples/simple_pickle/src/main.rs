@@ -3,36 +3,57 @@
 //! * Loading an existing DB from a file
 //! * Setting and getting key-value pairs of different types
 
+use std::fmt::{self, Display, Formatter};
+
 use rusty_pickle::{DumpPolicy, Pickle, SerializationMethod};
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct Rectangle {
+    width: i32,
+    length: i32,
+}
+
+impl Display for Rectangle {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "Rectangle: length={}, width={}", self.length, self.width)
+    }
+}
 
 fn main() {
-    let mut db = Pickle::new("test.db", DumpPolicy::Auto, SerializationMethod::Json);
+    // create a new DB with Autodump so every change is written to file
+    let mut db = Pickle::new("example.db", DumpPolicy::Auto, SerializationMethod::Json);
 
-    // set the value 100 to the key 'key1'
     db.set("key1", &100).unwrap();
-
-    // set the value 1.1 to the key 'key2'
     db.set("key2", &1.1).unwrap();
-
-    // set the value 'hello world' to the key 'key3'
     db.set("key3", &String::from("hello world")).unwrap();
+    db.set("key4", &vec![1, 2, 3]).unwrap();
 
-    let num_keys = db.key_count();
-    println!("You have inserted {} keys", num_keys);
+    db.set(
+        "key5",
+        &Rectangle {
+            width: 4,
+            length: 10,
+        },
+    )
+    .unwrap();
 
-    let keys = db.list_keys();
-    println!("Now we will print all of the keys in the database");
-    keys.iter().for_each(|k| println!("{}", k));
-
-    println!("Now we will load the json file into a new database and get the values");
+    // load an existing DB from a file (the same file in this case)
     let db2 = Pickle::load(
-        "test.db",
+        "/Users/ian/rusty-pickle/example.db",
         DumpPolicy::UponRequest,
         SerializationMethod::Json,
     )
     .unwrap();
 
-    println!("Getting the value for key: key1");
-    let val1: String = db2.get::<String>("key1").unwrap();
-    println!("The value is {}", val1);
+    // print the value of key1
+    println!(
+        "The value of key1 is: {}",
+        db2.get::<String>("key1").unwrap()
+    );
+
+    println!(
+        "Value of key1 as loaded from file is: {}",
+        db2.get::<String>("key1").unwrap()
+    );
 }
